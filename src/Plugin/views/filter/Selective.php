@@ -288,7 +288,7 @@ class Selective extends InOperator {
       $display = $view_copy->getDisplay();
 
       // Remove any exposed form configuration. This showed up with BEF module!
-      unset($display->display_options['exposed_form']);
+      unset($display->display['display_options']['exposed_form']);
 
       $fields =& $display->getHandlers('field');
 
