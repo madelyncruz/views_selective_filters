@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_selective_filters\Plugin\views\filter\Selective.
- */
-
 namespace Drupal\views_selective_filters\Plugin\views\filter;
 
 use Drupal\Component\Utility\SafeMarkup;
@@ -30,6 +25,11 @@ class Selective extends InOperator {
    */
   protected $originalOptions;
 
+  /**
+   * A static cache used for storing results.
+   *
+   * @var array
+   */
   protected static $results;
 
   /**
@@ -52,7 +52,7 @@ class Selective extends InOperator {
     $options['selective_display_field']['default'] = '';
     // Storage for sort used to sort display values.
     $options['selective_display_sort']['default'] = 'ASC';
-    // Storage for aggregated fields
+    // Storage for aggregated fields.
     $options['selective_aggregated_fields']['default'] = '';
     // Limit aggregated items to prevent a huge number of options in select.
     $options['selective_items_limit']['default'] = 100;
@@ -91,7 +91,7 @@ class Selective extends InOperator {
         // in our custom override no form is generated when $this->valueOptions
         // is not an array. We only want this to happen in the administrative
         // interface.
-        // unset($this->valueOptions);
+        // unset($this->valueOptions);.
       }
     }
 
@@ -115,7 +115,7 @@ class Selective extends InOperator {
     // to obtain selective values.
     // if (empty($this->view->selective_oids)) {
     //   $form['#attached']['js'][] = drupal_get_path('module', 'views_filters_selective') . '/js/attachBehaviours.js';
-    // }
+    // }.
   }
 
   /**
@@ -133,8 +133,8 @@ class Selective extends InOperator {
 
     parent::buildOptionsForm($form, $form_state);
     // Filter should always be exposed, show warning.
-    array_unshift($form['expose_button'], array(
-      'warning' => array(
+    array_unshift($form['expose_button'], [
+      'warning' => [
         '#theme' => 'status_messages',
         '#message_list' => ['warning' => [t('This filter is always exposed to users.')]],
         '#status_headings' => [
@@ -142,7 +142,8 @@ class Selective extends InOperator {
           'error' => t('Error message'),
           'warning' => t('Warning message'),
         ],
-      )));
+      ],
+    ]);
     // Remove option to unexpose filter. Tried to disable, but did not work.
     $form['expose_button']['checkbox']['checkbox']['#type'] = 'hidden';
     unset($form['expose_button']['button']);
@@ -160,13 +161,13 @@ class Selective extends InOperator {
       }
     }
 
-    $form['selective_display_field'] = array(
+    $form['selective_display_field'] = [
       '#title' => t('Display field'),
       '#type' => 'select',
       '#description' => t('Field to be used for the selective options.'),
       '#options' => $options,
       '#default_value' => $this->options['selective_display_field'],
-    );
+    ];
 
     // Add combo to pick sort for display.
     $options = [];
@@ -180,23 +181,23 @@ class Selective extends InOperator {
     $options['ASC'] = t('Custom ascending (asort)');
     $options['DESC'] = t('Custom descending (asort reverse)');
     // TODO: Allow the use of view's sorts!
-    //foreach ($this->view->display_handler->handlers['sort'] as $key => $handler) {
+    // foreach ($this->view->display_handler->handlers['sort'] as $key => $handler) {
     //  $options[$handler->options['id']] = $handler->definition['group'] . ': ' . $handler->definition['title'];
-    //}
-    $form['selective_display_sort'] = array(
+    // }.
+    $form['selective_display_sort'] = [
       '#title' => t('Sort field'),
       '#type' => 'select',
       '#description' => t('Choose wich field to use for display'),
       '#options' => $options,
       '#default_value' => $this->options['selective_display_sort'],
-    );
-    $form['selective_items_limit'] = array(
+    ];
+    $form['selective_items_limit'] = [
       '#title' => t('Limit number of select items'),
       '#type' => 'textfield',
       '#description' => t("Don't allow a badly configured selective filter to return thousands of possible values. Enter a limit or remove any value for no limit. We recommend to set a limit no higher than 100."),
       '#default_value' => $this->options['selective_items_limit'],
       '#min' => 0,
-    );
+    ];
   }
 
   /**
@@ -239,7 +240,7 @@ class Selective extends InOperator {
    *   The signature.
    */
   protected function getSignature() {
-    return hash('sha256', serialize(array(
+    return hash('sha256', serialize([
       'id' => $this->view->id(),
       'args' => $this->view->args,
       'input' => $this->view->getExposedInput(),
@@ -248,7 +249,7 @@ class Selective extends InOperator {
       'field' => $this->field,
       'table' => $this->table,
       'ui_name' => $this->adminLabel(),
-    )));
+    ]));
   }
 
   /**
@@ -297,9 +298,10 @@ class Selective extends InOperator {
       // Check to see if the user remembered to add the field.
       if (empty($fields)) {
         drupal_set_message(t('Selective query filter must have corresponding field added to view with Administrative Name set to "@name" and Base Type "@type"',
-          array(
+          [
             '@name' => $ui_name,
-            '@type' => $base_field)),
+            '@type' => $base_field,
+          ]),
             'error');
         return [];
       }
@@ -321,9 +323,10 @@ class Selective extends InOperator {
 
       if (!$equal) {
         drupal_set_message(t('Selective filter "@name": relationship of field and filter must match.',
-          array(
+          [
             '@name' => $ui_name,
-            '@type' => $base_field)),
+            '@type' => $base_field,
+          ]),
             'error');
         return [];
       }
@@ -335,8 +338,7 @@ class Selective extends InOperator {
 
       // Remove all sorting: sorts must be added to aggregate fields.
       // $sorts =& $display->getHandlers('sort');
-      // $sorts = [];
-
+      // $sorts = [];.
       // Turn this into an aggregate query.
       $display->setOption('group_by', 1);
 
@@ -375,7 +377,7 @@ class Selective extends InOperator {
 
       // Sort values.
       $sort_option = $this->options['selective_display_sort'];
-      switch($sort_option) {
+      switch ($sort_option) {
         case 'ASC':
           asort($oids);
           break;
@@ -405,7 +407,7 @@ class Selective extends InOperator {
 
       // If limit exceeded this field is not good for being "selective".
       if (!empty($max_items) && count($oids) == $max_items) {
-        drupal_set_message(t('Selective filter "@field" has limited the amount of total results. Please, review you query configuration.', array('@field' => $ui_name)), 'warning');
+        drupal_set_message(t('Selective filter "@field" has limited the amount of total results. Please, review you query configuration.', ['@field' => $ui_name]), 'warning');
       }
 
       static::$results[$signature] = $oids;
@@ -426,8 +428,8 @@ class Selective extends InOperator {
    * @return array
    *   The original filter options list narrowed to the cloned query results.
    */
-  static protected function filterOriginalOptions($options, $set) {
-    $filtered = array();
+  protected static function filterOriginalOptions(array $options, array $set) {
+    $filtered = [];
 
     foreach ($options as $key => $value) {
       // Handle grouped options.
