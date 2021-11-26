@@ -414,7 +414,7 @@ class Selective extends InOperator {
       $view_copy->destroy();
     }
 
-    return static::$results[$signature];
+    return array_filter(static::$results[$signature]);
   }
 
   /**
