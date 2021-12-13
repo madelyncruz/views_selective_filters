@@ -2,12 +2,12 @@
 
 namespace Drupal\views_selective_filters\Plugin\views\filter;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\filter\InOperator;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
+use Drupal\Component\Utility\Html;
 
 /**
  * Views filter handler for selective values.
@@ -136,11 +136,11 @@ class Selective extends InOperator {
     array_unshift($form['expose_button'], [
       'warning' => [
         '#theme' => 'status_messages',
-        '#message_list' => ['warning' => [t('This filter is always exposed to users.')]],
+        '#message_list' => ['warning' => [$this->t('This filter is always exposed to users.')]],
         '#status_headings' => [
-          'status' => t('Status message'),
-          'error' => t('Error message'),
-          'warning' => t('Warning message'),
+          'status' => $this->t('Status message'),
+          'error' => $this->t('Error message'),
+          'warning' => $this->t('Warning message'),
         ],
       ],
     ]);
@@ -162,39 +162,39 @@ class Selective extends InOperator {
     }
 
     $form['selective_display_field'] = [
-      '#title' => t('Display field'),
+      '#title' => $this->t('Display field'),
       '#type' => 'select',
-      '#description' => t('Field to be used for the selective options.'),
+      '#description' => $this->t('Field to be used for the selective options.'),
       '#options' => $options,
       '#default_value' => $this->options['selective_display_field'],
     ];
 
     // Add combo to pick sort for display.
     $options = [];
-    $options['NONE'] = t('No sorting');
+    $options['NONE'] = $this->t('No sorting');
     // Add option for custom sortings.
     if ($this->getOriginalOptions()) {
-      $options['ORIG'] = t('As the original filter');
+      $options['ORIG'] = $this->t('As the original filter');
     }
-    $options['KASC'] = t('Custom key ascending (ksort)');
-    $options['KDESC'] = t('Custom key descending (ksort reverse)');
-    $options['ASC'] = t('Custom ascending (asort)');
-    $options['DESC'] = t('Custom descending (asort reverse)');
+    $options['KASC'] = $this->t('Custom key ascending (ksort)');
+    $options['KDESC'] = $this->t('Custom key descending (ksort reverse)');
+    $options['ASC'] = $this->t('Custom ascending (asort)');
+    $options['DESC'] = $this->t('Custom descending (asort reverse)');
     // TODO: Allow the use of view's sorts!
     // foreach ($this->view->display_handler->handlers['sort'] as $key => $handler) {
     //  $options[$handler->options['id']] = $handler->definition['group'] . ': ' . $handler->definition['title'];
     // }.
     $form['selective_display_sort'] = [
-      '#title' => t('Sort field'),
+      '#title' => $this->t('Sort field'),
       '#type' => 'select',
-      '#description' => t('Choose wich field to use for display'),
+      '#description' => $this->t('Choose wich field to use for display'),
       '#options' => $options,
       '#default_value' => $this->options['selective_display_sort'],
     ];
     $form['selective_items_limit'] = [
-      '#title' => t('Limit number of select items'),
+      '#title' => $this->t('Limit number of select items'),
       '#type' => 'textfield',
-      '#description' => t("Don't allow a badly configured selective filter to return thousands of possible values. Enter a limit or remove any value for no limit. We recommend to set a limit no higher than 100."),
+      '#description' => $this->t("Don't allow a badly configured selective filter to return thousands of possible values. Enter a limit or remove any value for no limit. We recommend to set a limit no higher than 100."),
       '#default_value' => $this->options['selective_items_limit'],
       '#min' => 0,
     ];
@@ -297,12 +297,12 @@ class Selective extends InOperator {
 
       // Check to see if the user remembered to add the field.
       if (empty($fields)) {
-        drupal_set_message(t('Selective query filter must have corresponding field added to view with Administrative Name set to "@name" and Base Type "@type"',
+        \Drupal::messenger()->addMessage('Selective query filter must have corresponding field added to view with Administrative Name set to "@name" and Base Type "@type"',
           [
             '@name' => $ui_name,
             '@type' => $base_field,
-          ]),
-            'error');
+          ],
+          'error');
         return [];
       }
 
@@ -322,12 +322,12 @@ class Selective extends InOperator {
         ($field_options['relationship'] === $this->options['relationship']);
 
       if (!$equal) {
-        drupal_set_message(t('Selective filter "@name": relationship of field and filter must match.',
+        \Drupal::messenger()->addMessage('Selective filter "@name": relationship of field and filter must match.',
           [
             '@name' => $ui_name,
             '@type' => $base_field,
-          ]),
-            'error');
+          ],
+          'error');
         return [];
       }
 
@@ -372,7 +372,7 @@ class Selective extends InOperator {
         $key = is_array($key) ? reset($key) : $key;
         // @todo This double escapes markup.
         $value = $style->getField($row->index, $field_id);
-        $oids[$key] = SafeMarkup::checkPlain($value);
+        $oids[$key] = Html::escape($value);
       }
 
       // Sort values.
@@ -407,7 +407,7 @@ class Selective extends InOperator {
 
       // If limit exceeded this field is not good for being "selective".
       if (!empty($max_items) && count($oids) == $max_items) {
-        drupal_set_message(t('Selective filter "@field" has limited the amount of total results. Please, review you query configuration.', ['@field' => $ui_name]), 'warning');
+        \Drupal::messenger()->addMessage('Selective filter "@field" has limited the amount of total results. Please, review you query configuration.', ['@field' => $ui_name], 'warning');
       }
 
       static::$results[$signature] = $oids;

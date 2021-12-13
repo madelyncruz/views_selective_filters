@@ -3,5 +3,6 @@ type: module
 description: Restrict exposed filter values to those present in the result set.
 package: Views
 core: 8.x
+core_version_requirement: ^8.8 || ^9
 dependencies:
-  - views
+  - drupal:views
