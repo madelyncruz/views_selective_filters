@@ -297,11 +297,11 @@ class Selective extends InOperator {
 
       // Check to see if the user remembered to add the field.
       if (empty($fields)) {
-        \Drupal::messenger()->addMessage('Selective query filter must have corresponding field added to view with Administrative Name set to "@name" and Base Type "@type"',
+        \Drupal::messenger()->addMessage(t('Selective query filter must have corresponding field added to view with Administrative Name set to "@name" and Base Type "@type"',
           [
             '@name' => $ui_name,
             '@type' => $base_field,
-          ],
+          ]),
           'error');
         return [];
       }
@@ -322,11 +322,11 @@ class Selective extends InOperator {
         ($field_options['relationship'] === $this->options['relationship']);
 
       if (!$equal) {
-        \Drupal::messenger()->addMessage('Selective filter "@name": relationship of field and filter must match.',
+        \Drupal::messenger()->addMessage(t('Selective filter "@name": relationship of field and filter must match.',
           [
             '@name' => $ui_name,
             '@type' => $base_field,
-          ],
+          ]),
           'error');
         return [];
       }
@@ -407,7 +407,7 @@ class Selective extends InOperator {
 
       // If limit exceeded this field is not good for being "selective".
       if (!empty($max_items) && count($oids) == $max_items) {
-        \Drupal::messenger()->addMessage('Selective filter "@field" has limited the amount of total results. Please, review you query configuration.', ['@field' => $ui_name], 'warning');
+        \Drupal::messenger()->addMessage(t('Selective filter "@field" has limited the amount of total results. Please, review you query configuration.', ['@field' => $ui_name]), 'warning');
       }
 
       static::$results[$signature] = $oids;
