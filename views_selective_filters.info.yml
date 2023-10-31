@@ -2,6 +2,6 @@ name: Views selective filters
 type: module
 description: Restrict exposed filter values to those present in the result set.
 package: Views
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^8.8 || ^9 || ^10
 dependencies:
   - drupal:views
